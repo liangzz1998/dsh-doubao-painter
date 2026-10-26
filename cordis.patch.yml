@@ -1,0 +1,28 @@
+# ============================================================================
+# dsh-doubao-painter —— DSH bundle patch
+# ============================================================================
+# 插件挂载声明：DSH 启动时把本插件插进 profile 的配置树。
+#
+# 安装（本地开发，link 到源码目录）：
+#   dsh plugin --profile desktop add "link:D:\dsh-plugins\dsh-doubao-painter"
+# 然后在 ~/.dsh/profiles/desktop/package.json 的 dsh.profile.bundles 里
+# 加上 "dsh-doubao-painter"，重启 DSH 生效。
+#
+# ⚠️ `name:` 必须与安装后的包名完全一致（这里是 dsh-doubao-painter）。
+# ============================================================================
+
+- insert:
+    - id: dsh-doubao-painter
+      name: dsh-doubao-painter
+      config:
+        enabled: true
+        # 豆包 Electron 的 CDP 调试端口（插件用 --remote-debugging-port 拉起豆包）
+        cdpPort: 9225
+        # 豆包主程序路径（launcher D:\Doubao\Doubao.exe 不传参，必须用 app 目录里的主程序）
+        appExe: 'D:\Doubao\app\Doubao.exe'
+        # 单张图等待上限（毫秒）；正常 20~90 秒
+        timeoutMs: 180000
+        # 每个任务开新对话，别把用户正在聊的会话弄乱
+        newChatPerTask: true
+        # 图片默认落在会话工作区的这个子目录
+        outSubdir: doubao-images
