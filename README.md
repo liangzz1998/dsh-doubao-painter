@@ -112,6 +112,21 @@ echo '{"prompt":"..."}' | node tools\paint.mjs --stdin-json --json
 
 ---
 
+## 附：视频取用（`tools/video.mjs`）
+
+借用豆包 `video-extract` 技能的脚本，下载在线视频 + 自动转 mp3，**不消耗对话额度、不用开豆包 UI**：
+
+```powershell
+node tools\video.mjs info "https://www.bilibili.com/video/BV..."          # 元数据（标题/时长/播放/封面）
+node tools\video.mjs download "https://www.bilibili.com/video/BV..." --out D:\videos
+```
+
+支持 B站 / YouTube / TikTok / 快手 / 微博 / X / Instagram 等 20 个平台，产物是 mp4 + mp3 一对。
+
+转写（逐字稿）依赖飞书妙记，需要 `lark-cli` 授权，未授权会失败——但 mp3 已经在本地，接 whisper 就能补。
+
+---
+
 ## 附：直接调用豆包的技能脚本（`tools/skill.mjs`）
 
 豆包把它的技能放在
