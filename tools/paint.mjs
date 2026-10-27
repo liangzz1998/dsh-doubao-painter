@@ -69,6 +69,7 @@ if (opts.stdinJson) {
     const j = JSON.parse(raw)
     req = {
       prompt: j.prompt ?? req.prompt,
+      prompts: j.prompts ?? req.prompts,
       refImages: j.refImages ?? j.ref_images ?? req.refImages,
       outDir: j.outDir ?? j.out_dir ?? req.outDir,
       newChat: j.newChat ?? req.newChat,
@@ -80,7 +81,8 @@ if (opts.stdinJson) {
   }
 }
 
-if (!req.prompt || !String(req.prompt).trim()) {
+const batch = Array.isArray(req.prompts) ? req.prompts.map((p) => String(p ?? '').trim()).filter(Boolean) : []
+if (!batch.length && (!req.prompt || !String(req.prompt).trim())) {
   const msg = '缺少提示词'
   if (opts.json) console.log(JSON.stringify({ ok: false, error: msg }))
   else console.error(msg + '。用法: node tools/paint.mjs "<提示词>"')
@@ -95,8 +97,27 @@ const bridge = new DoubaoBridge({
 const started = Date.now()
 try {
   await bridge.connect()
+  if (batch.length > 1) {
+    const res = await bridge.generateBatch({
+      prompts: batch,
+      outDir: req.outDir,
+      timeoutMs: Number(req.timeoutMs) || 180000,
+      archiveToProject: true,
+    })
+    const ms = Date.now() - started
+    const files = res.items.flatMap((it) => it.files || [])
+    if (opts.json) {
+      console.log(JSON.stringify({ ok: true, ms, items: res.items, files, archived: res.archived ?? null }, null, 2))
+    } else {
+      console.log(`✅ 批量完成（${(ms / 1000).toFixed(1)}s，${res.items.length} 条）`)
+      for (const it of res.items) {
+        console.log(`  #${it.index + 1} ${it.error ? '❌ ' + it.error : it.files.join(', ')}`)
+      }
+    }
+    process.exitCode = 0
+  } else {
   const res = await bridge.generate({
-    prompt: req.prompt,
+    prompt: batch.length === 1 ? batch[0] : req.prompt,
     outDir: req.outDir,
     refImages: Array.isArray(req.refImages) ? req.refImages.filter(Boolean) : [],
     newChat: req.newChat !== false,
@@ -108,6 +129,7 @@ try {
   } else {
     console.log(`✅ 生成完成（${(ms / 1000).toFixed(1)}s）`)
     for (const f of res.files) console.log('  ' + f)
+  }
   }
 } catch (e) {
   if (opts.json) console.log(JSON.stringify({ ok: false, error: String(e?.message || e) }, null, 2))

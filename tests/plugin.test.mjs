@@ -86,7 +86,8 @@ test('doubao_paint 参数必填 prompt', () => {
   const { ctx, registered } = fakeCtx()
   apply(ctx, {})
   const paint = registered.find((d) => d.name === 'doubao_paint')
-  assert.deepEqual(paint.parameters.required, ['prompt'])
+  assert.ok(paint.parameters.properties.prompt, '要有 prompt 参数')
+  assert.ok(paint.parameters.properties.prompts, '要有批量 prompts 参数')
   assert.equal(paint.parameters.properties.prompt.type, 'string')
   assert.equal(paint.parameters.properties.ref_images.type, 'array')
   assert.equal(paint.parameters.properties.ref_images.items.type, 'string')
@@ -98,7 +99,7 @@ test('doubao_paint 拒绝空 prompt 与相对路径参考图', async () => {
   const paint = registered.find((d) => d.name === 'doubao_paint')
   const exec = { agent: {}, signal: new AbortController().signal }
 
-  await assert.rejects(() => paint.execute({ prompt: '   ' }, exec), /prompt 不能为空/)
+  await assert.rejects(() => paint.execute({ prompt: '   ' }, exec), /prompt \/ prompts 至少要给一个/)
   await assert.rejects(
     () => paint.execute({ prompt: 'x', ref_images: ['relative.png'] }, exec),
     /绝对路径/,
