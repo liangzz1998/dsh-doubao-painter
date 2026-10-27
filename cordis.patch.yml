@@ -26,3 +26,6 @@
         newChatPerTask: true
         # 图片默认落在会话工作区的这个子目录
         outSubdir: doubao-images
+        # 豆包侧边栏里的「项目」（分类文件夹）：DSH 的对话都塞这里，
+        # 不会和用户自己的对话混在一起。项目不存在时插件会自动建。
+        projectName: 'DSH 和豆包的秘密画室'

@@ -35,6 +35,7 @@ for (let i = 0; i < argv.length; i++) {
     case '--prompt': opts.promptArg = argv[++i]; break
     case '--cdp': opts.cdp = Number(argv[++i]); break
     case '--exe': opts.exe = argv[++i]; break
+    case '--project': opts.project = argv[++i]; break
     case '--no-new-chat': opts.newChat = false; break
     case '--timeout': opts.timeout = Number(argv[++i]); break
     case '--stdin-json': opts.stdinJson = true; break
@@ -57,6 +58,7 @@ let req = {
   timeoutMs: opts.timeout,
   cdpPort: opts.cdp,
   appExe: opts.exe,
+  projectName: opts.project,
 }
 
 if (opts.stdinJson) {
@@ -73,6 +75,7 @@ if (opts.stdinJson) {
       timeoutMs: j.timeoutMs ?? req.timeoutMs,
       cdpPort: j.cdpPort ?? req.cdpPort,
       appExe: j.appExe ?? req.appExe,
+      projectName: j.projectName ?? req.projectName,
     }
   }
 }
@@ -84,7 +87,11 @@ if (!req.prompt || !String(req.prompt).trim()) {
   process.exit(2)
 }
 
-const bridge = new DoubaoBridge({ port: Number(req.cdpPort) || DEFAULT_CDP_PORT, appExe: req.appExe || DEFAULT_APP_EXE })
+const bridge = new DoubaoBridge({
+  port: Number(req.cdpPort) || DEFAULT_CDP_PORT,
+  appExe: req.appExe || DEFAULT_APP_EXE,
+  projectName: req.projectName,
+})
 const started = Date.now()
 try {
   await bridge.connect()
