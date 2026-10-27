@@ -1,6 +1,6 @@
 {
   "name": "dsh-doubao-painter",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "把本机豆包桌面客户端的生图能力接进 DeepSeek Harness：agent 一句 doubao_paint 就能让豆包出图，并直接拿到无水印高清原图。基于 CDP 驱动，不需要逆向接口、不需要额外 API Key、不产生去水印成本。",
   "keywords": [
     "dsh",
