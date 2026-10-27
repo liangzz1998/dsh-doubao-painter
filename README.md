@@ -112,6 +112,36 @@ echo '{"prompt":"..."}' | node tools\paint.mjs --stdin-json --json
 
 ---
 
+## 附：直接调用豆包的技能脚本（`tools/skill.mjs`）
+
+豆包把它的技能放在
+
+```
+%LOCALAPPDATA%\Doubao\User Data\Default\.doubao\agent_mode\workspace\.skills\<技能名>\
+```
+
+每个技能 = `SKILL.md`（说明书）+ `scripts/`（Python 工具集）+ `references/`（平台文档）。
+共 112 个技能，其中 47 个带脚本（`ppt` 265 个 py、`pdf` 18、`video-extract` 28…）。
+
+**这些脚本可以在本地直接跑**，不走 UI、不消耗对话额度——用豆包自带的沙箱 Python：
+
+```powershell
+node tools\skill.mjs list                        # 112 个技能
+node tools\skill.mjs read doubao-video-extract   # 看说明书
+node tools\skill.mjs scripts pdf                 # 看有哪些脚本
+node tools\skill.mjs run doubao-video-extract scripts/minutes/social_video_to_minutes.py -- "<url>" --media-mode video
+```
+
+实测能跑通的：视频下载（B站/YouTube/TikTok 等 20 个平台）、视频转音频、PDF/Word 分析工具。
+
+**跑不通的**：生图、云端媒体处理、飞书妙记转写——这些脚本最终调云端接口，
+需要豆包运行时注入的凭证（`DOUBAO_OFFICE_PLATFORM_APP_ID` 等），只能走豆包 UI。
+
+小细节：跑脚本务必带 `PYTHONIOENCODING=utf-8`（`skill.mjs` 已经设好了），
+否则 Windows 默认 GBK 会在输出中文时炸掉。
+
+---
+
 ## 配置（`cordis.patch.yml`）
 
 | 字段 | 默认 | 说明 |
