@@ -104,7 +104,7 @@ try {
   })
   const ms = Date.now() - started
   if (opts.json) {
-    console.log(JSON.stringify({ ok: true, ms, files: res.files, urls: res.urls, pageText: res.pageText }, null, 2))
+    console.log(JSON.stringify({ ok: true, ms, files: res.files, urls: res.urls, archived: res.archived ?? null, pageText: res.pageText }, null, 2))
   } else {
     console.log(`✅ 生成完成（${(ms / 1000).toFixed(1)}s）`)
     for (const f of res.files) console.log('  ' + f)
