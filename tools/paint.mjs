@@ -59,6 +59,7 @@ let req = {
   cdpPort: opts.cdp,
   appExe: opts.exe,
   projectName: opts.project,
+  reuseSession: opts.reuseSession,
 }
 
 if (opts.stdinJson) {
@@ -77,6 +78,7 @@ if (opts.stdinJson) {
       cdpPort: j.cdpPort ?? req.cdpPort,
       appExe: j.appExe ?? req.appExe,
       projectName: j.projectName ?? req.projectName,
+      reuseSession: j.reuseSession ?? req.reuseSession,
     }
   }
 }
@@ -93,6 +95,7 @@ const bridge = new DoubaoBridge({
   port: Number(req.cdpPort) || DEFAULT_CDP_PORT,
   appExe: req.appExe || DEFAULT_APP_EXE,
   projectName: req.projectName,
+  reuseSession: req.reuseSession,
 })
 const started = Date.now()
 try {
