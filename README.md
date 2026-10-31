@@ -76,6 +76,21 @@ dsh plugin --profile desktop add "link:D:\dsh-plugins\dsh-doubao-painter"
 > **如果豆包已经在普通模式下运行着**，需要先完全退出它（托盘 → 退出），
 > 否则新实例不会抢端口。
 
+### 让豆包常驻调试端口（推荐）
+
+每次都要退出豆包太烦。把快捷方式改成带参数启动，以后点图标就是带端口的实例，
+插件随时能连，不用再关窗口：
+
+```powershell
+# 桌面 + 开始菜单两个快捷方式都改（先备份成 .bat-20261031 之类的名字）
+$s = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:USERPROFILE\Desktop\豆包.lnk")
+$s.TargetPath = "D:\Doubao\app\Doubao.exe"
+$s.Arguments  = "--remote-debugging-port=9225"
+$s.Save()
+```
+
+注意 Target 要写成 `D:\Doubao\app\Doubao.exe`（主程序），不是 launcher 的 `D:\Doubao\Doubao.exe`。
+
 ---
 
 ## 使用
@@ -216,7 +231,7 @@ node tools\archive.mjs
 ## 已知限制（都是「用 UI」换来的）
 
 - **会动你的豆包窗口**：任务进行中会点开图片预览、开新对话。别在它干活时手动操作豆包。
-- **需要调试端口**：豆包必须由插件带 `--remote-debugging-port` 启动。从快捷方式正常启动的实例没有这个端口。
+- **需要调试端口**：豆包必须带 `--remote-debugging-port` 启动。从快捷方式正常启动的实例没有这个端口——按上面「让豆包常驻调试端口」改一次快捷方式即可一劳永逸。
 - **豆包改版会坏**：DOM 结构、CDN 模板名都可能变。坏了先跑 `node tools\paint.mjs "test" --json` 看报错，再改 `lib/bridge.mjs` 里的选择器。
 - **串行**：豆包只有一个界面，插件用文件锁保证同一时刻只跑一个任务。
 - **额度**：吃的是你豆包账号的免费额度（用页面上的「今日签到领 200 额度」那套）。
@@ -232,6 +247,7 @@ node tools\archive.mjs
 | `没找到豆包聊天页` | 豆包没登录，或停在非聊天页。手动打开一次主界面 |
 | `页面提示：额度不足` | 豆包免费额度用完了，去客户端签到/等明天 |
 | 拿到 384×216 小图 | 原图升级那步没成功（预览没点开）。重跑一次；或看 `lib/bridge.mjs` 的 `openPreviewForKey` |
+| 冷启动后第一张图拿到的是上一张旧图 | 0.5.1 已修：刚启动/刚跳回会话时历史消息异步渲染，基线抓早了。现在会等图片数量稳定再抓基线，并在提交后二次采样 |
 | 报 `找不到可执行脚本的 node` | 设环境变量 `DSH_NODE` 为真实 node 路径 |
 
 ---
