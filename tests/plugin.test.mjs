@@ -8,6 +8,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { apply, resolveConfig, inject, name } from '../lib/index.js'
+import { pickBestImageUrls, imageKey } from '../lib/bridge.mjs'
 
 function fakeCtx() {
   const registered = []
@@ -120,4 +121,16 @@ test('doubao_status 返回结构化状态且不抛错', async () => {
   assert.equal(r.appExeExists, false)
   assert.equal(typeof r.hint, 'string')
   assert.ok(r.hint.length > 0)
+})
+
+test('pickBestImageUrls 只认带 ~tplv- 模板的地址，优先 cgen 原图', () => {
+  const base = 'https://p.example/rc_gen_image/abc123.jpeg'
+  const thumb = base + '~tplv-xx-cthumb_lwm3:aaa.png?sig=1'
+  const gen = base + '~tplv-xx-cgen_wm0_hflow:bbb.png?sig=2'
+  assert.deepEqual(pickBestImageUrls([base, thumb, gen]), [gen])
+  // 没有 cgen 时退到非缩略图；只剩缩略图时就用缩略图
+  assert.deepEqual(pickBestImageUrls([thumb]), [thumb])
+  // 裸地址（没有模板后缀）直接下会 403，不选它
+  assert.deepEqual(pickBestImageUrls([base, thumb]), [thumb])
+  assert.equal(imageKey(thumb), imageKey(gen))
 })
