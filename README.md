@@ -33,7 +33,7 @@ agent 一句话 `doubao_paint`，豆包在后台出图，**直接拿回无水印
 
 ## 原理
 
-豆包桌面端是 Electron（Chromium 147）。用调试端口启动它：
+豆包桌面端基于 Chromium（147）。用调试端口启动它：
 
 ```powershell
 "D:\Doubao\app\Doubao.exe" --remote-debugging-port=9225
@@ -47,7 +47,7 @@ agent 一句话 `doubao_paint`，豆包在后台出图，**直接拿回无水印
 4. 点开图片拿到 `cgen` 原图 URL
 5. 下载到会话工作区的 `doubao-images/`
 
-图生图（P 图）走文件输入：把参考图塞进豆包隐藏的 `input[type=file]`，等上传完再发指令。
+图生图（P 图）走文件输入：老版客户端页面上直接有 `input[type=file]`；2026-11 起的新版要先点输入框左边的「+」→「上传文件或图片」，文件框才会临时挂出来。插件用 `Page.setInterceptFileChooserDialog` 拦下系统文件框（不会弹到桌面上），把参考图交给它，等缩略图出现在聊天输入框里再发指令。
 
 ---
 
@@ -230,10 +230,10 @@ node tools\archive.mjs
 
 ## 已知限制（都是「用 UI」换来的）
 
-- **会动你的豆包窗口**：任务进行中会点开图片预览、开新对话。别在它干活时手动操作豆包。
+- **会动你的豆包窗口**：任务进行中会点开图片预览、开新对话。上一条还在生成时会按 Esc 停掉；输入框里留着没发出去的附件、或消息发不出去时会重新加载页面；挂参考图前会关掉右侧工作台的页签（最多 3 个）并收起它。别在它干活时手动操作豆包。
 - **需要调试端口**：豆包必须带 `--remote-debugging-port` 启动。从快捷方式正常启动的实例没有这个端口——按上面「让豆包常驻调试端口」改一次快捷方式即可一劳永逸。
 - **豆包改版会坏**：DOM 结构、CDN 模板名都可能变。坏了先跑 `node tools\paint.mjs "test" --json` 看报错，再改 `lib/bridge.mjs` 里的选择器。
-- **串行**：豆包只有一个界面，插件用文件锁保证同一时刻只跑一个任务。
+- **串行**：豆包只有一个界面，同一时刻只能跑一个任务。插件目前没有跨进程的锁，别让两个会话同时调用它。
 - **额度**：吃的是你豆包账号的免费额度（用页面上的「今日签到领 200 额度」那套）。
 - **不保证多图**：豆包一次给几张由它自己决定，插件把拿到的都下下来。
 
@@ -257,7 +257,7 @@ node tools\archive.mjs
 ```
 lib/bridge.mjs        CDP 驱动核心（连接/发消息/抓图/下载/原图升级）
 lib/index.js          cordis 插件壳：注册 doubao_paint / doubao_status
-lib/resolve-node.mjs  在 Electron 里找真 node
+lib/resolve-node.mjs  在 DSH（Electron）里找真 node
 tools/paint.mjs       CLI（插件走子进程调它，也可手动用）
 cordis.patch.yml      bundle patch
 tests/plugin.test.mjs 离线测试（不启动豆包）
